@@ -1,0 +1,184 @@
+generator client {
+  provider   = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  role        String    @default("STUDENT") // TRAINER, STUDENT, SUPER_ADMIN
+  name        String
+  lastLoginAt DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  studentProfile  StudentProfile?
+  trainerProfile  TrainerProfile?
+  examsCreated    Exam[]           @relation("TrainerExams")
+  results         Result[]
+  answers         Answer[]
+  activityLogs    ActivityLog[]
+  courseMaterials CourseMaterial[] @relation("TrainerMaterials")
+  featureUsages   FeatureUsage[]
+  resourcesUploaded StudentResource[] @relation("TrainerStudentResources")
+  resourcesReceived StudentResource[] @relation("StudentResources")
+}
+
+model StudentResource {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  materialType String   @default("NOTES") // NOTES, REVISION
+  fileUrl      String
+  fileName     String?
+  fileType     String   @default("document")
+  category     String?  // PYTHON, R — null = all categories
+  level        String?  // BEGINNER, INTERMEDIATE, PROFESSIONAL — null = all levels
+  createdAt    DateTime @default(now())
+
+  trainerId String
+  trainer   User   @relation("TrainerStudentResources", fields: [trainerId], references: [id], onDelete: Cascade)
+
+  studentId String? // null = shared with matching category/level; set = one student only
+  student   User?   @relation("StudentResources", fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model FeatureUsage {
+  id        String   @id @default(uuid())
+  feature   String
+  metadata  String?
+  timestamp DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ArchiveRecord {
+  id         String    @id @default(uuid())
+  entityType String
+  entityId   String
+  data       String
+  deletedBy  String?
+  deletedAt  DateTime  @default(now())
+  restoredAt DateTime?
+}
+
+model StudentProfile {
+  id           String @id @default(uuid())
+  userId       String @unique
+  examCategory String @default("PYTHON") // R, PYTHON
+  examLevel    String @default("BEGINNER") // BEGINNER, INTERMEDIATE, PROFESSIONAL
+  user         User   @relation(fields: [userId], references: [id])
+}
+
+model TrainerProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Exam {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  instructions    String?
+  duration        Int // Duration in minutes
+  totalMarks      Int
+  startDate       DateTime
+  endDate         DateTime
+  allowedAttempts Int      @default(1)
+  passingMarks    Int
+  category        String   @default("PYTHON") // R, PYTHON
+  level           String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, PROFESSIONAL
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trainerId String
+  trainer   User   @relation("TrainerExams", fields: [trainerId], references: [id])
+
+  questions       Question[]
+  results         Result[]
+  answers         Answer[]
+  activityLogs    ActivityLog[]
+  courseMaterials CourseMaterial[]
+}
+
+model Question {
+  id            String       @id @default(uuid())
+  text          String
+  type          String       // MCQ, TRUE_FALSE, SHORT_ANSWER, ESSAY, FILE_UPLOAD
+  marks         Int
+  options       String?      // Store options for MCQ as JSON string
+  correctAnswer String?      // Could be text or option index
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  answers Answer[]
+}
+
+model Answer {
+  id           String   @id @default(uuid())
+  textAnswer   String?
+  fileUrl      String?
+  marksAwarded Int?
+  createdAt    DateTime @default(now())
+
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Result {
+  id        String       @id @default(uuid())
+  score     Int
+  status    String       @default("PENDING") // PASS, FAIL, PENDING
+  createdAt DateTime     @default(now())
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  eventType String // e.g., TAB_SWITCH, MINIMIZE, FULLSCREEN_EXIT
+  details   String? // Store as JSON string
+  timestamp DateTime @default(now())
+
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   User   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model CourseMaterial {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  fileUrl     String
+  fileType    String   @default("document") // document, pdf, video, other
+  createdAt   DateTime @default(now())
+
+  examId  String
+  exam    Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  uploaderId String
+  uploader   User   @relation("TrainerMaterials", fields: [uploaderId], references: [id])
+}
