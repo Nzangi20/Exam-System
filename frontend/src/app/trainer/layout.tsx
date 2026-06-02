@@ -22,6 +22,7 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
 
   if (!user || (user.role !== 'TRAINER' && user.role !== 'SUPER_ADMIN')) {
     redirect('/login');
+    return null;
   }
 
   const navItems = [

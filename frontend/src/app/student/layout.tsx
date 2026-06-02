@@ -23,6 +23,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   if (!user || user.role !== 'STUDENT') {
     redirect('/login');
+    return null;
   }
 
   const navItems = [

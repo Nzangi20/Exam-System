@@ -34,6 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!user || user.role !== 'SUPER_ADMIN') {
     redirect('/login');
+    return null;
   }
 
   const navItems = [
