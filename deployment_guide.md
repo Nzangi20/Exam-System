@@ -51,7 +51,7 @@ Configure these variables in your hosting provider's dashboard:
 | `PORT` | The port the backend listens on | `5000` (handled dynamically by Render) |
 | `DATABASE_URL` | Cloud PostgreSQL connection string | `postgresql://user:pass@host:port/dbname` |
 | `JWT_SECRET` | Strong secret key for signing user sessions | *Generate a secure random string* |
-| `FRONTEND_URL` | URL of your deployed Next.js frontend | `https://examsystem-frontend.vercel.app` |
+| `FRONTEND_URL` | URL of your deployed Next.js frontend | `https://exam-system-nrna-git-main-nzangi20s-projects.vercel.app` |
 
 ### B. Deployment Steps (e.g., Render)
 1. Sign in to [Render](https://render.com) and click **New > Web Service**.

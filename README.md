@@ -1,6 +1,8 @@
 # Leaders Among Us - Online Examination System
 
-A modern, secure, and responsive full-stack online examination platform designed for educational institutions and corporate assessments. 
+A modern, secure, and responsive full-stack online examination platform designed for educational institutions and corporate assessments.
+
+**🚀 Live Demo:** [exam-system-nrna-git-main-nzangi20s-projects.vercel.app](https://exam-system-nrna-git-main-nzangi20s-projects.vercel.app) 
 
 ## Features
 
