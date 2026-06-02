@@ -52,11 +52,6 @@ A modern, secure, and responsive full-stack online examination platform designed
    npm run dev   # Starts the frontend server on port 3000
    ```
 
-### Default Seed Accounts
-If you ran the seed script, the following accounts are available (Password for all: `password123`):
-- Trainer: `trainer@example.com`
-- Student: `student@example.com`
-- Admin: `admin@example.com`
 
 ## Folder Structure
 

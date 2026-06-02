@@ -10,30 +10,32 @@ This comprehensive guide walks you through migrating from local development (SQL
 graph TD
     User([Student / Trainer]) -->|HTTPS| Frontend[Next.js App on Vercel]
     Frontend -->|API Requests| Backend[Node.js Express API on Render / Railway]
-    Backend -->|Database Queries| Database[(Managed PostgreSQL on Supabase / Neon / Render)]
+    Backend -->|Database Queries| Database[(Managed MySQL Database)]
 ```
 
 ---
 
-## 1. Database Deployment (PostgreSQL)
+## 1. Database Deployment (MySQL / phpMyAdmin)
 
-For production, we recommend switching from the local SQLite database to a managed cloud PostgreSQL database (e.g., **Supabase**, **Neon.tech**, or **Render PostgreSQL**).
+For production, we recommend switching to a managed cloud MySQL database (e.g., **Aiven MySQL**, **phpMyAdmin-managed MySQL**, or **Render MySQL**).
 
-### A. Switch Prisma to PostgreSQL
+### A. Switch Prisma to MySQL
 1. Open `backend/prisma/schema.prisma`.
-2. Locate the `datasource db` block and update the `provider` and `url`:
+2. Locate the `datasource db` block and ensure the `provider` and `url` are configured as follows:
    ```prisma
    datasource db {
-     provider = "postgresql"
+     provider = "mysql"
      url      = env("DATABASE_URL")
    }
    ```
-3. Create a managed PostgreSQL database on your chosen provider (e.g., [Supabase](https://supabase.com) or [Neon](https://neon.tech)) and copy the database connection string.
+3. Locate your MySQL connection details from your hosting provider or phpMyAdmin:
+   - Connection URL format: `mysql://<username>:<password>@<host>:<port>/<database_name>`
+   - If using SSL (which is required by some providers like Aiven MySQL), append `?sslmode=required` or similar ssl parameters to the connection string:
+     `mysql://<username>:<password>@<host>:<port>/<dbname>?ssl-mode=REQUIRED`
 
 ### B. Configure Connection Strings
-You will need two environment variables for Prisma:
-* `DATABASE_URL`: The direct transactional connection string (e.g. for querying).
-* `DIRECT_URL`: (Optional, but required by providers like Supabase for migration pooling) The direct database connection string.
+You will need environment variables for Prisma:
+* `DATABASE_URL`: The MySQL connection string configured with your credentials.
 
 ---
 

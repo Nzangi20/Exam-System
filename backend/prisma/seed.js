@@ -6,6 +6,43 @@ const prisma = new PrismaClient({});
 async function main() {
   console.log('Seeding database...');
 
+  // Clean up any existing seed data to prevent P2002 unique constraint errors
+  console.log('Cleaning up existing seed data...');
+  
+  await prisma.studentProfile.deleteMany({
+    where: {
+      user: {
+        email: { in: ['trainer@example.com', 'student@example.com', 'admin@example.com'] }
+      }
+    }
+  });
+
+  await prisma.trainerProfile.deleteMany({
+    where: {
+      user: {
+        email: { in: ['trainer@example.com', 'student@example.com', 'admin@example.com'] }
+      }
+    }
+  });
+
+  await prisma.exam.deleteMany({
+    where: {
+      trainer: {
+        email: 'trainer@example.com'
+      }
+    }
+  });
+
+  await prisma.user.deleteMany({
+    where: {
+      email: {
+        in: ['trainer@example.com', 'student@example.com', 'admin@example.com']
+      }
+    }
+  });
+
+  console.log('Clean-up complete. Re-creating users...');
+
   // 1. Create Users
   const hashedPassword = await bcrypt.hash('password123', 10);
 
