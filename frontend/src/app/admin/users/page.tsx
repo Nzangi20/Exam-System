@@ -13,6 +13,13 @@ interface UserRow {
   createdAt: string;
 }
 
+interface ResetRequest {
+  id: string;
+  email: string;
+  status: string;
+  createdAt: string;
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,8 +66,43 @@ export default function AdminUsersPage() {
     }
   };
 
+  const [resets, setResets] = useState<ResetRequest[]>([]);
+  const [resetsLoading, setResetsLoading] = useState(true);
+
+  const fetchResets = async () => {
+    try {
+      const res = await api.get('/api/users/password-resets');
+      setResets(res.data);
+    } catch {
+      setMessage('Failed to load password resets');
+    } finally {
+      setResetsLoading(false);
+    }
+  };
+
+  const approveReset = async (id: string) => {
+    try {
+      await api.put(`/api/users/password-resets/${id}/approve`);
+      setMessage('Password reset approved successfully');
+      fetchResets();
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || 'Failed to approve password reset');
+    }
+  };
+
+  const rejectReset = async (id: string) => {
+    try {
+      await api.put(`/api/users/password-resets/${id}/reject`);
+      setMessage('Password reset request rejected');
+      fetchResets();
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || 'Failed to reject password reset');
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchResets();
   }, []);
 
   const updateRole = async (id: string, role: string) => {
@@ -210,6 +252,71 @@ export default function AdminUsersPage() {
                         <Trash2 className="w-4 h-4" />
                         Archive
                       </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Password Reset Requests Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-6 border-b border-slate-100">
+          <h2 className="text-lg font-bold text-slate-900">Password Reset Requests</h2>
+          <p className="text-slate-500 text-sm">Approve or reject candidate password reset requests.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Email Address</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Requested At</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
+                <th className="text-right px-4 py-3 font-medium text-slate-600">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resetsLoading ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400">Loading requests...</td>
+                </tr>
+              ) : resets.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400">No reset requests found</td>
+                </tr>
+              ) : (
+                resets.map((req) => (
+                  <tr key={req.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="px-4 py-3 font-medium text-slate-900">{req.email}</td>
+                    <td className="px-4 py-3 text-slate-600">{formatDate(req.createdAt)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
+                        ${req.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : ''}
+                        ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' : ''}
+                        ${req.status === 'REJECTED' ? 'bg-rose-100 text-rose-800' : ''}
+                      `}>
+                        {req.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {req.status === 'PENDING' && (
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => approveReset(req.id)}
+                            className="px-2.5 py-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded transition-colors cursor-pointer"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => rejectReset(req.id)}
+                            className="px-2.5 py-1 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded transition-colors cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))

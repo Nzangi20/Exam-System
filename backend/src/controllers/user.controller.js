@@ -184,11 +184,95 @@ const createUser = async (req, res) => {
   }
 };
 
+// Get password reset requests (super admin only)
+const getPasswordResets = async (req, res) => {
+  try {
+    const requests = await prisma.passwordResetRequest.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch password reset requests', details: error.message });
+  }
+};
+
+// Approve password reset request (super admin only)
+const approvePasswordReset = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await prisma.passwordResetRequest.findUnique({
+      where: { id }
+    });
+
+    if (!request) {
+      return res.status(404).json({ error: 'Reset request not found' });
+    }
+
+    if (request.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Request is already processed' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: request.email }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User associated with this request not found' });
+    }
+
+    // Update user password and request status in transaction
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { password: request.newPassword }
+      }),
+      prisma.passwordResetRequest.update({
+        where: { id },
+        data: { status: 'APPROVED' }
+      })
+    ]);
+
+    res.json({ message: 'Password reset approved and updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to approve password reset', details: error.message });
+  }
+};
+
+// Reject password reset request (super admin only)
+const rejectPasswordReset = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const request = await prisma.passwordResetRequest.findUnique({
+      where: { id }
+    });
+
+    if (!request) {
+      return res.status(404).json({ error: 'Reset request not found' });
+    }
+
+    if (request.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Request is already processed' });
+    }
+
+    await prisma.passwordResetRequest.update({
+      where: { id },
+      data: { status: 'REJECTED' }
+    });
+
+    res.json({ message: 'Password reset request rejected' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to reject password reset', details: error.message });
+  }
+};
+
 module.exports = {
   getStudents,
   getAllUsers,
   deleteUser,
   updateUserRole,
   updateProfile,
-  createUser
+  createUser,
+  getPasswordResets,
+  approvePasswordReset,
+  rejectPasswordReset
 };

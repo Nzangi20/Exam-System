@@ -1,11 +1,20 @@
 const express = require('express');
-const { getStudents, getAllUsers, deleteUser, updateUserRole, updateProfile, createUser } = require('../controllers/user.controller');
+const { getStudents, getAllUsers, deleteUser, updateUserRole, updateProfile, createUser, getPasswordResets, approvePasswordReset, rejectPasswordReset } = require('../controllers/user.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
 // Get all students (trainers and admins)
 router.get('/students', authenticate, authorize('TRAINER', 'SUPER_ADMIN'), getStudents);
+
+// Get password reset requests (super admin only)
+router.get('/password-resets', authenticate, authorize('SUPER_ADMIN'), getPasswordResets);
+
+// Approve password reset request (super admin only)
+router.put('/password-resets/:id/approve', authenticate, authorize('SUPER_ADMIN'), approvePasswordReset);
+
+// Reject password reset request (super admin only)
+router.put('/password-resets/:id/reject', authenticate, authorize('SUPER_ADMIN'), rejectPasswordReset);
 
 // Get all users (super admin only)
 router.get('/', authenticate, authorize('SUPER_ADMIN'), getAllUsers);

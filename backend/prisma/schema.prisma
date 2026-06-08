@@ -182,3 +182,12 @@ model CourseMaterial {
   uploaderId String
   uploader   User   @relation("TrainerMaterials", fields: [uploaderId], references: [id])
 }
+
+model PasswordResetRequest {
+  id          String   @id @default(uuid())
+  email       String
+  newPassword String
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

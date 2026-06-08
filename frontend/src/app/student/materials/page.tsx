@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import { BookOpen, FileText, Download, StickyNote, Library } from 'lucide-react';
+import { BookOpen, FileText, StickyNote, Library, Eye, X } from 'lucide-react';
 
 export default function StudentMaterialsPage() {
   const [resources, setResources] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'NOTES' | 'REVISION'>('ALL');
+  const [viewingResource, setViewingResource] = useState<any>(null);
 
   useEffect(() => {
     api
@@ -51,16 +52,13 @@ export default function StudentMaterialsPage() {
           From {r.trainer?.name} · {new Date(r.createdAt).toLocaleDateString()}
         </p>
       </div>
-      <a
-        href={r.fileUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        download
-        className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white text-sm font-medium rounded-lg hover:bg-violet-700 shrink-0 self-center"
+      <button
+        onClick={() => setViewingResource(r)}
+        className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg shrink-0 self-center cursor-pointer"
       >
-        <Download className="w-4 h-4" />
-        Download
-      </a>
+        <Eye className="w-4 h-4" />
+        View Material
+      </button>
     </div>
   );
 
@@ -126,6 +124,71 @@ export default function StudentMaterialsPage() {
               ))}
             </section>
           )}
+        </div>
+      )}
+      {/* Document Viewer Modal */}
+      {viewingResource && (
+        <div 
+          className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <div className="bg-slate-950 rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl border border-slate-800 overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900">
+              <div className="min-w-0">
+                <h3 className="font-bold text-white truncate">{viewingResource.title}</h3>
+                {viewingResource.description && (
+                  <p className="text-xs text-slate-400 truncate mt-0.5">{viewingResource.description}</p>
+                )}
+              </div>
+              <button
+                onClick={() => setViewingResource(null)}
+                className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Body / Viewer */}
+            <div className="flex-1 bg-slate-900 relative">
+              {viewingResource.fileUrl?.endsWith('.pdf') ? (
+                <iframe
+                  src={`${viewingResource.fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                  className="w-full h-full border-none select-none"
+                  title={viewingResource.title}
+                />
+              ) : viewingResource.fileUrl?.match(/\.(mp4|webm|ogg)$/i) ? (
+                <video
+                  src={viewingResource.fileUrl}
+                  controls
+                  controlsList="nodownload"
+                  className="w-full h-full object-contain select-none"
+                  onContextMenu={(e) => e.preventDefault()}
+                />
+              ) : viewingResource.fileUrl?.match(/\.(png|jpe?g|gif|webp|svg)$/i) ? (
+                <div className="w-full h-full flex items-center justify-center p-4 select-none">
+                  <img
+                    src={viewingResource.fileUrl}
+                    alt={viewingResource.title}
+                    className="max-w-full max-h-full object-contain rounded"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                  />
+                </div>
+              ) : (
+                <iframe
+                  src={`${viewingResource.fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                  className="w-full h-full border-none select-none"
+                  title={viewingResource.title}
+                />
+              )}
+            </div>
+            {/* Disclaimer Footer */}
+            <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 text-center text-xs text-slate-500 font-semibold select-none">
+              🔒 Protected Study Material. Printing, copying, and downloading are disabled.
+            </div>
+          </div>
         </div>
       )}
     </div>

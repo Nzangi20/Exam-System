@@ -167,16 +167,31 @@ const forgotPassword = async (req, res) => {
       return res.status(403).json({ error: 'Account has been deactivated' });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { password: hashedPassword }
+    const existingRequest = await prisma.passwordResetRequest.findFirst({
+      where: { email, status: 'PENDING' }
     });
 
-    res.json({ message: 'Password reset successfully' });
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    if (existingRequest) {
+      await prisma.passwordResetRequest.update({
+        where: { id: existingRequest.id },
+        data: { newPassword: hashedPassword }
+      });
+    } else {
+      await prisma.passwordResetRequest.create({
+        data: {
+          email,
+          newPassword: hashedPassword,
+          status: 'PENDING'
+        }
+      });
+    }
+
+    res.json({ message: 'Password reset request submitted successfully. Please wait for Administrator approval.' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to reset password', details: error.message });
+    res.status(500).json({ error: 'Failed to submit password reset request', details: error.message });
   }
 };
 
