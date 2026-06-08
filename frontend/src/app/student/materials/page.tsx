@@ -12,6 +12,12 @@ export default function StudentMaterialsPage() {
 
   const getFullUrl = (url: string) => {
     if (!url) return '';
+    const uploadsIndex = url.indexOf('/uploads/');
+    if (uploadsIndex !== -1) {
+      const relativePath = url.substring(uploadsIndex);
+      const cleanUrl = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+      return `${API_BASE}/${cleanUrl}`;
+    }
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
     const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
     return `${API_BASE}/${cleanUrl}`;
@@ -137,19 +143,19 @@ export default function StudentMaterialsPage() {
       {viewingResource && (() => {
         const fullUrl = getFullUrl(viewingResource.fileUrl);
         return (
-          <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-950 rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl border border-slate-800 overflow-hidden">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
               {/* Modal Header */}
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900">
+              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-slate-50">
                 <div className="min-w-0">
-                  <h3 className="font-bold text-white truncate">{viewingResource.title}</h3>
+                  <h3 className="font-bold text-slate-800 truncate">{viewingResource.title}</h3>
                   {viewingResource.description && (
-                    <p className="text-xs text-slate-400 truncate mt-0.5">{viewingResource.description}</p>
+                    <p className="text-xs text-slate-550 truncate mt-0.5">{viewingResource.description}</p>
                   )}
                 </div>
                 <button
                   onClick={() => setViewingResource(null)}
-                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                   title="Close"
                 >
                   <X className="w-6 h-6" />
@@ -157,11 +163,11 @@ export default function StudentMaterialsPage() {
               </div>
 
               {/* Modal Body / Viewer */}
-              <div className="flex-1 bg-slate-900 relative">
+              <div className="flex-1 bg-white relative">
                 {viewingResource.fileUrl?.endsWith('.pdf') ? (
                   <iframe
-                    src={`${fullUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                    className="w-full h-full border-none"
+                    src={fullUrl}
+                    className="w-full h-full border-none bg-white"
                     title={viewingResource.title}
                   />
                 ) : viewingResource.fileUrl?.match(/\.(mp4|webm|ogg)$/i) ? (
@@ -169,10 +175,10 @@ export default function StudentMaterialsPage() {
                     src={fullUrl}
                     controls
                     controlsList="nodownload"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain bg-slate-950"
                   />
                 ) : viewingResource.fileUrl?.match(/\.(png|jpe?g|gif|webp|svg)$/i) ? (
-                  <div className="w-full h-full flex items-center justify-center p-4">
+                  <div className="w-full h-full flex items-center justify-center p-4 bg-white">
                     <img
                       src={fullUrl}
                       alt={viewingResource.title}
@@ -181,15 +187,11 @@ export default function StudentMaterialsPage() {
                   </div>
                 ) : (
                   <iframe
-                    src={`${fullUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                    className="w-full h-full border-none"
+                    src={fullUrl}
+                    className="w-full h-full border-none bg-white"
                     title={viewingResource.title}
                   />
                 )}
-              </div>
-              {/* Disclaimer Footer */}
-              <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 text-center text-xs text-slate-500 font-semibold select-none">
-                🔒 Protected Study Material. Direct downloads are restricted.
               </div>
             </div>
           </div>
