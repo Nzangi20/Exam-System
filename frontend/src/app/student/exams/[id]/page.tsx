@@ -203,7 +203,7 @@ export default function TakeExamPage(props: { params: Promise<{ id: string }> })
                 <div className="flex-1 bg-white relative">
                   {viewingResource.fileUrl?.endsWith('.pdf') ? (
                     <iframe
-                      src={fullUrl}
+                      src={`${fullUrl}#toolbar=0`}
                       className="w-full h-full border-none bg-white"
                       title={viewingResource.title}
                     />
@@ -224,7 +224,7 @@ export default function TakeExamPage(props: { params: Promise<{ id: string }> })
                     </div>
                   ) : (
                     <iframe
-                      src={fullUrl}
+                      src={`${fullUrl}#toolbar=0`}
                       className="w-full h-full border-none bg-white"
                       title={viewingResource.title}
                     />

@@ -166,7 +166,7 @@ export default function StudentMaterialsPage() {
               <div className="flex-1 bg-white relative">
                 {viewingResource.fileUrl?.endsWith('.pdf') ? (
                   <iframe
-                    src={fullUrl}
+                    src={`${fullUrl}#toolbar=0`}
                     className="w-full h-full border-none bg-white"
                     title={viewingResource.title}
                   />
@@ -187,7 +187,7 @@ export default function StudentMaterialsPage() {
                   </div>
                 ) : (
                   <iframe
-                    src={fullUrl}
+                    src={`${fullUrl}#toolbar=0`}
                     className="w-full h-full border-none bg-white"
                     title={viewingResource.title}
                   />
