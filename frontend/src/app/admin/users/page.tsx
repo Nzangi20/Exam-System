@@ -18,6 +18,36 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
+  const [newName, setNewName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newRole, setNewRole] = useState('TRAINER');
+  const [addingUser, setAddingUser] = useState(false);
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddingUser(true);
+    setMessage('');
+    try {
+      await api.post('/api/users', {
+        name: newName,
+        email: newEmail,
+        password: newPassword,
+        role: newRole,
+      });
+      setMessage('User created successfully');
+      setNewName('');
+      setNewEmail('');
+      setNewPassword('');
+      setNewRole('TRAINER');
+      fetchUsers();
+    } catch (err: any) {
+      setMessage(err.response?.data?.error || 'Failed to create user');
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
   const fetchUsers = async () => {
     try {
       const res = await api.get('/api/users');
@@ -69,6 +99,67 @@ export default function AdminUsersPage() {
           {message}
         </div>
       )}
+
+      {/* Add New User Card */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 className="text-lg font-bold text-slate-900 mb-4">Add New User</h2>
+        <form onSubmit={handleAddUser} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Full Name</label>
+            <input
+              type="text"
+              required
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="e.g. Jane Tutor"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-violet-500 text-slate-950 bg-white"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Email Address</label>
+            <input
+              type="email"
+              required
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="jane@example.com"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-violet-500 text-slate-950 bg-white"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Password</label>
+            <input
+              type="password"
+              required
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-violet-500 text-slate-950 bg-white"
+            />
+          </div>
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Role</label>
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-violet-500 text-slate-950"
+              >
+                <option value="TRAINER">Trainer / Tutor</option>
+                <option value="STUDENT">Student</option>
+                <option value="SUPER_ADMIN">Super Admin</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={addingUser}
+              className="px-4 py-2 text-sm font-semibold bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors h-[38px] disabled:opacity-50 cursor-pointer"
+            >
+              {addingUser ? 'Adding...' : 'Add'}
+            </button>
+          </div>
+        </form>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">

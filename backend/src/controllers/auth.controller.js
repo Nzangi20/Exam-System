@@ -21,8 +21,8 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Email is already in use' });
     }
 
-    if (role === 'SUPER_ADMIN') {
-      return res.status(403).json({ error: 'Cannot register as SUPER_ADMIN' });
+    if (role === 'SUPER_ADMIN' || role === 'TRAINER') {
+      return res.status(403).json({ error: 'Only student accounts can be registered publicly' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -153,8 +153,36 @@ const getMe = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ error: 'Email and new password are required' });
+    }
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'No user found with this email' });
+    }
+    if (user.deletedAt) {
+      return res.status(403).json({ error: 'Account has been deactivated' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword }
+    });
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to reset password', details: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
+  forgotPassword,
 };

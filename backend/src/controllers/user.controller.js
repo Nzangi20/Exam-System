@@ -138,10 +138,57 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Create a new user (super admin only)
+const createUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ error: 'Name, email, password, and role are required' });
+    }
+    if (!['STUDENT', 'TRAINER', 'SUPER_ADMIN'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email is already in use' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+      }
+    });
+
+    if (role === 'STUDENT') {
+      await prisma.studentProfile.create({
+        data: {
+          userId: user.id,
+          examCategory: 'PYTHON',
+          examLevel: 'BEGINNER',
+        }
+      });
+    } else if (role === 'TRAINER') {
+      await prisma.trainerProfile.create({
+        data: { userId: user.id }
+      });
+    }
+
+    res.status(201).json({ id: user.id, name: user.name, email: user.email, role: user.role });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create user', details: error.message });
+  }
+};
+
 module.exports = {
   getStudents,
   getAllUsers,
   deleteUser,
   updateUserRole,
-  updateProfile
+  updateProfile,
+  createUser
 };

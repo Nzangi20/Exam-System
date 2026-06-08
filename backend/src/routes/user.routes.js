@@ -1,5 +1,5 @@
 const express = require('express');
-const { getStudents, getAllUsers, deleteUser, updateUserRole, updateProfile } = require('../controllers/user.controller');
+const { getStudents, getAllUsers, deleteUser, updateUserRole, updateProfile, createUser } = require('../controllers/user.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
 
 const router = express.Router();
@@ -9,6 +9,9 @@ router.get('/students', authenticate, authorize('TRAINER', 'SUPER_ADMIN'), getSt
 
 // Get all users (super admin only)
 router.get('/', authenticate, authorize('SUPER_ADMIN'), getAllUsers);
+
+// Create a user (super admin only)
+router.post('/', authenticate, authorize('SUPER_ADMIN'), createUser);
 
 // Update own profile
 router.put('/profile', authenticate, updateProfile);

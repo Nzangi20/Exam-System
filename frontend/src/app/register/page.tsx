@@ -109,23 +109,6 @@ export default function RegisterPage() {
               {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message as string}</p>}
             </div>
 
-            {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">I am a...</label>
-              <div className="grid grid-cols-2 gap-3">
-                {[{ value: 'STUDENT', label: 'Student' }, { value: 'TRAINER', label: 'Trainer' }].map((r) => (
-                  <label
-                    key={r.value}
-                    className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all font-medium text-sm
-                      ${selectedRole === r.value ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}
-                  >
-                    <input type="radio" value={r.value} {...register('role')} className="sr-only" />
-                    {r.label}
-                  </label>
-                ))}
-              </div>
-            </div>
-
             {/* Student-only: Category & Level */}
             {selectedRole === 'STUDENT' && (
               <div className="space-y-5 border-t border-slate-100 pt-4">
