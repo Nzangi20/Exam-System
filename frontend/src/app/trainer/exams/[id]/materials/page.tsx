@@ -89,7 +89,6 @@ export default function TrainerMaterialsPage(props: { params: Promise<{ id: stri
       const res = await axios.post(`${API_BASE}/api/materials`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
         },
       });
 

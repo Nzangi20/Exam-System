@@ -84,7 +84,7 @@ body {
   color: #475569;
 }
 
-/* Login & register — CDAM lab screenshot background */
+/* Login & register — CDAM lab classroom background */
 .cdam-auth-bg {
   background-color: #1a1a2e;
   background-image:
@@ -94,14 +94,14 @@ body {
       rgba(30, 27, 75, 0.55) 35%,
       rgba(15, 23, 42, 0.65) 100%
     ),
-    url("/images/cdam-auth-background.jpg");
+    url("/images/cdam-classroom-1.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
 
-/* All dashboards — CDAM lab photo with light overlay (scrolls with page, no fixed-attachment glitches) */
+/* Fallback/Default dashboard — CDAM presenter classroom photo with light overlay */
 .cdam-page-bg {
   background-color: #eef2f7;
   background-image:
@@ -111,7 +111,58 @@ body {
       rgba(248, 250, 252, 0.85) 40%,
       rgba(255, 255, 255, 0.9) 100%
     ),
-    url("/images/cdam-dashboard-bg.jpg");
+    url("/images/cdam-classroom-2.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  min-height: 100%;
+}
+
+/* Student dashboard — CDAM presentation photo with light overlay */
+.cdam-student-page-bg {
+  background-color: #eef2f7;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(248, 250, 252, 0.85) 40%,
+      rgba(255, 255, 255, 0.9) 100%
+    ),
+    url("/images/cdam-presentation.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  min-height: 100%;
+}
+
+/* Trainer dashboard — CDAM presenter classroom photo with light overlay */
+.cdam-trainer-page-bg {
+  background-color: #eef2f7;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(248, 250, 252, 0.85) 40%,
+      rgba(255, 255, 255, 0.9) 100%
+    ),
+    url("/images/cdam-classroom-2.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  min-height: 100%;
+}
+
+/* Admin dashboard — CDAM presenter classroom photo with light overlay */
+.cdam-admin-page-bg {
+  background-color: #eef2f7;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.88) 0%,
+      rgba(248, 250, 252, 0.85) 40%,
+      rgba(255, 255, 255, 0.9) 100%
+    ),
+    url("/images/cdam-classroom-2.png");
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;

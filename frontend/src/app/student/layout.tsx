@@ -15,7 +15,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center cdam-page-bg">
+      <div className="min-h-screen flex items-center justify-center cdam-student-page-bg">
         <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
       </div>
     );

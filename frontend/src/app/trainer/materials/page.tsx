@@ -76,9 +76,7 @@ export default function TrainerStudentMaterialsPage() {
       formData.append('level', level);
       if (studentId) formData.append('studentId', studentId);
 
-      const res = await api.post('/api/student-resources', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const res = await api.post('/api/student-resources', formData);
 
       setResources([res.data, ...resources]);
       setTitle('');
