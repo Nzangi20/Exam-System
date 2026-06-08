@@ -32,6 +32,13 @@ export default function TakeExamPage(props: { params: Promise<{ id: string }> })
   const [examStarted, setExamStarted] = useState(false);
   const [viewingResource, setViewingResource] = useState<any>(null);
 
+  const getFullUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const cleanUrl = url.startsWith('/') ? url.slice(1) : url;
+    return `${API_BASE}/${cleanUrl}`;
+  };
+
   useEffect(() => {
     const fetchExamData = async () => {
       try {
@@ -170,70 +177,67 @@ export default function TakeExamPage(props: { params: Promise<{ id: string }> })
         )}
 
         {/* Document Viewer Modal */}
-        {viewingResource && (
-          <div 
-            className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onContextMenu={(e) => e.preventDefault()}
-          >
-            <div className="bg-slate-950 rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl border border-slate-800 overflow-hidden">
-              {/* Modal Header */}
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900">
-                <div className="min-w-0">
-                  <h3 className="font-bold text-white truncate">{viewingResource.title}</h3>
-                  {viewingResource.description && (
-                    <p className="text-xs text-slate-400 truncate mt-0.5">{viewingResource.description}</p>
+        {viewingResource && (() => {
+          const fullUrl = getFullUrl(viewingResource.fileUrl);
+          return (
+            <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-slate-950 rounded-2xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl border border-slate-800 overflow-hidden">
+                {/* Modal Header */}
+                <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900">
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-white truncate">{viewingResource.title}</h3>
+                    {viewingResource.description && (
+                      <p className="text-xs text-slate-400 truncate mt-0.5">{viewingResource.description}</p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setViewingResource(null)}
+                    className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                    title="Close"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Modal Body / Viewer */}
+                <div className="flex-1 bg-slate-900 relative">
+                  {viewingResource.fileUrl?.endsWith('.pdf') ? (
+                    <iframe
+                      src={`${fullUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                      className="w-full h-full border-none"
+                      title={viewingResource.title}
+                    />
+                  ) : viewingResource.fileUrl?.match(/\.(mp4|webm|ogg)$/i) ? (
+                    <video
+                      src={fullUrl}
+                      controls
+                      controlsList="nodownload"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : viewingResource.fileUrl?.match(/\.(png|jpe?g|gif|webp|svg)$/i) ? (
+                    <div className="w-full h-full flex items-center justify-center p-4">
+                      <img
+                        src={fullUrl}
+                        alt={viewingResource.title}
+                        className="max-w-full max-h-full object-contain rounded"
+                      />
+                    </div>
+                  ) : (
+                    <iframe
+                      src={`${fullUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                      className="w-full h-full border-none"
+                      title={viewingResource.title}
+                    />
                   )}
                 </div>
-                <button
-                  onClick={() => setViewingResource(null)}
-                  className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                  title="Close"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              {/* Modal Body / Viewer */}
-              <div className="flex-1 bg-slate-900 relative">
-                {viewingResource.fileUrl?.endsWith('.pdf') ? (
-                  <iframe
-                    src={`${viewingResource.fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                    className="w-full h-full border-none select-none"
-                    title={viewingResource.title}
-                  />
-                ) : viewingResource.fileUrl?.match(/\.(mp4|webm|ogg)$/i) ? (
-                  <video
-                    src={viewingResource.fileUrl}
-                    controls
-                    controlsList="nodownload"
-                    className="w-full h-full object-contain select-none"
-                    onContextMenu={(e) => e.preventDefault()}
-                  />
-                ) : viewingResource.fileUrl?.match(/\.(png|jpe?g|gif|webp|svg)$/i) ? (
-                  <div className="w-full h-full flex items-center justify-center p-4 select-none">
-                    <img
-                      src={viewingResource.fileUrl}
-                      alt={viewingResource.title}
-                      className="max-w-full max-h-full object-contain rounded"
-                      onContextMenu={(e) => e.preventDefault()}
-                      onDragStart={(e) => e.preventDefault()}
-                    />
-                  </div>
-                ) : (
-                  <iframe
-                    src={`${viewingResource.fileUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                    className="w-full h-full border-none select-none"
-                    title={viewingResource.title}
-                  />
-                )}
-              </div>
-              {/* Disclaimer Footer */}
-              <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 text-center text-xs text-slate-500 font-semibold select-none">
-                🔒 Protected Study Material. Printing, copying, and downloading are disabled.
+                {/* Disclaimer Footer */}
+                <div className="bg-slate-950 px-6 py-3 border-t border-slate-800 text-center text-xs text-slate-500 font-semibold select-none">
+                  🔒 Protected Study Material. Direct downloads are restricted.
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     );
   }
