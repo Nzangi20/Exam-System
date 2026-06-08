@@ -16,13 +16,20 @@ import {
   Loader2,
   FileText,
 } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import PortalTopBar from '@/components/PortalTopBar';
 import PortalShell from '@/components/PortalShell';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!loading && (!user || user.role !== 'SUPER_ADMIN')) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -33,7 +40,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (!user || user.role !== 'SUPER_ADMIN') {
-    redirect('/login');
     return null;
   }
 

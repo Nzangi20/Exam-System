@@ -5,12 +5,19 @@ import { useAuth } from '@/context/AuthContext';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutDashboard, FileText, Users, Settings, LogOut, Loader2, Shield, FolderOpen } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import PortalTopBar from '@/components/PortalTopBar';
 import PortalShell from '@/components/PortalShell';
 export default function TrainerLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!loading && (!user || (user.role !== 'TRAINER' && user.role !== 'SUPER_ADMIN'))) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -21,7 +28,6 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
   }
 
   if (!user || (user.role !== 'TRAINER' && user.role !== 'SUPER_ADMIN')) {
-    redirect('/login');
     return null;
   }
 
